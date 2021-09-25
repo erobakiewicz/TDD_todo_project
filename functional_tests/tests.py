@@ -2,11 +2,14 @@ import time
 
 from selenium import webdriver
 import unittest
-
+from django.test import LiveServerTestCase
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.keys import Keys
 
+MAX_WAIT = 10
 
-class NewVisitorTest(unittest.TestCase):
+
+class NewVisitorTest(LiveServerTestCase):
 
     def setUp(self) -> None:
         self.browser = webdriver.Firefox()
@@ -14,14 +17,25 @@ class NewVisitorTest(unittest.TestCase):
     def tearDown(self) -> None:
         self.browser.quit()
 
-    def check_for_row_in_list_table(self, row_text):
-        table = self.browser.find_element_by_id('id_list_table')
-        rows = table.find_elements_by_tag_name('tr')
-        self.assertIn(row_text, [row.text for row in rows])
+    # Unexpected NoSuchElementException and StaleElementException errors
+    # are the usual symptoms of forgetting an explicit wait.
+    # Try removing the time.sleep and see if you get one.
+    def wait_for_row_in_list_table(self, row_text):
+        start_time = time.time()
+        while True:
+            try:
+                table = self.browser.find_element_by_id('id_list_table')
+                rows = table.find_elements_by_tag_name('tr')
+                self.assertIn(row_text, [row.text for row in rows])
+                return
+            except (AssertionError, WebDriverException) as e:
+                if time.time() - start_time > MAX_WAIT:
+                    raise e
+                time.sleep(0.5)
 
-    def test_can_start_a_list_and_retrieve_it_later(self):
+    def test_can_start_a_list_for_one_user(self):
         # checks specific URL
-        self.browser.get('http://localhost:8000')
+        self.browser.get(self.live_server_url)
         # checks if title or header of the site mention to-do lists
         self.assertIn("To-Do", self.browser.title)
         header_text = self.browser.find_element_by_tag_name("h1").text
@@ -37,16 +51,14 @@ class NewVisitorTest(unittest.TestCase):
 
         # when user hits enter, the page updates and now there is one position on the list
         inputbox.send_keys(Keys.ENTER)
-        time.sleep(1)
-        self.check_for_row_in_list_table('1: Buy peacock feathers')
+        self.wait_for_row_in_list_table('1: Buy peacock feathers')
 
         # another item
         inputbox = self.browser.find_element_by_id('id_new_item')
         inputbox.send_keys("Use peacock feathers to make a fly")
         inputbox.send_keys(Keys.ENTER)
-        time.sleep(1)
-        self.check_for_row_in_list_table('1: Buy peacock feathers')
-        self.check_for_row_in_list_table('2: Use peacock feathers to make a fly')
+        self.wait_for_row_in_list_table('1: Buy peacock feathers')
+        self.wait_for_row_in_list_table('2: Use peacock feathers to make a fly')
 
         # the page updates again and now show both items on the list
         table = self.browser.find_element_by_id('id_list_table')
@@ -55,8 +67,44 @@ class NewVisitorTest(unittest.TestCase):
         self.assertIn('2: Use peacock feathers to make a fly', [row.text for row in rows])
 
         # there is still present box which enables adding new input
-        self.fail("Finish the test!")
 
-# checks if script was run by shell not imported to another script
-if __name__ == "__main__":
-    unittest.main(warnings='ignore')
+
+    def test_multiple_users_can_start_lists_at_different_urls(self):
+        # user starts a new to-do list
+        self.browser.get(self.live_server_url)
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys('Buy peacock feathers')
+        inputbox.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table('1: Buy peacock feathers')
+
+        # user notice that her list has unique URL
+        edith_list_url = self.browser.current_url
+        self.assertRegex(edith_list_url, '/lists/.+')
+
+        # NOW new user comes to the website
+        # we want new session for new user
+        self.browser.quit()
+        self.browser = webdriver.Firefox()
+
+        # new user visits the home page, no data from previous user
+        self.browser.get(self.live_server_url)
+        page_text = self.browser.find_element_by_tag_name("body").text
+        self.assertNotIn("Buy peacock feathers", page_text)
+        self.assertNotIn("make a fly", page_text)
+
+        # bew user starts a new list by entering an item
+        inputbox = self.browser.find_element_by_id('id_new_item')
+        inputbox.send_keys("Buy milk")
+        inputbox.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table('1: Buy milk')
+
+        # new user gets his own unique URL
+        francis_list_url = self.browser.current_url
+        self.assertRegex(francis_list_url, '/lists/.+')
+        self.assertNotEqual(francis_list_url, edith_list_url)
+
+        # again there is no trace of previous user activity
+        page_text = self.browser.find_element_by_tag_name('body').text
+        self.assertNotIn('Buy peacock feathers', page_text)
+        self.assertIn('Buy milk', page_text)
+
