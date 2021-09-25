@@ -68,7 +68,6 @@ class NewVisitorTest(LiveServerTestCase):
 
         # there is still present box which enables adding new input
 
-
     def test_multiple_users_can_start_lists_at_different_urls(self):
         # user starts a new to-do list
         self.browser.get(self.live_server_url)
