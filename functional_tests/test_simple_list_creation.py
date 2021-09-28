@@ -1,37 +1,9 @@
-import time
-
-from selenium import webdriver
-import unittest
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.keys import Keys
 
-MAX_WAIT = 10
+from functional_tests.base import FunctionalTest
 
 
-class NewVisitorTest(StaticLiveServerTestCase):
-
-    def setUp(self) -> None:
-        self.browser = webdriver.Firefox()
-
-    def tearDown(self) -> None:
-        self.browser.quit()
-
-    # Unexpected NoSuchElementException and StaleElementException errors
-    # are the usual symptoms of forgetting an explicit wait.
-    # Try removing the time.sleep and see if you get one.
-    def wait_for_row_in_list_table(self, row_text):
-        start_time = time.time()
-        while True:
-            try:
-                table = self.browser.find_element_by_id('id_list_table')
-                rows = table.find_elements_by_tag_name('tr')
-                self.assertIn(row_text, [row.text for row in rows])
-                return
-            except (AssertionError, WebDriverException) as e:
-                if time.time() - start_time > MAX_WAIT:
-                    raise e
-                time.sleep(0.5)
+class NewVisitorTest(FunctionalTest):
 
     def test_can_start_a_list_for_one_user(self):
         # checks specific URL
@@ -106,4 +78,3 @@ class NewVisitorTest(StaticLiveServerTestCase):
         page_text = self.browser.find_element_by_tag_name('body').text
         self.assertNotIn('Buy peacock feathers', page_text)
         self.assertIn('Buy milk', page_text)
-
