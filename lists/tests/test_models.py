@@ -23,7 +23,6 @@ class ListandItemModelsTest(TestCase):
         second_item.save()
 
         saved_list = List.objects.last()
-        print(List.objects.all())
         self.assertEqual(saved_list, list_)
 
         saved_items = Item.objects.all()
