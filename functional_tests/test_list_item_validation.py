@@ -1,5 +1,3 @@
-from unittest import skip
-
 from selenium.webdriver.common.keys import Keys
 
 from functional_tests.base import FunctionalTest
@@ -14,7 +12,7 @@ class ItemValidationTest(FunctionalTest):
         # page refreshes and there is a message that item cannot be blank
         self.wait_for(lambda: self.assertEqual(
             self.browser.find_element_by_css_selector('.has-error').text,
-            "You can't have an empty list item"
+            "You cannot have an empty list item"
         ))
         # user adds item with content and it works
         self.browser.find_element_by_id('id_new_item').send_keys('Buy milk')
@@ -26,7 +24,7 @@ class ItemValidationTest(FunctionalTest):
         # ... and gets similar warning
         self.wait_for(lambda: self.assertEqual(
             self.browser.find_element_by_css_selector('.has-error').text,
-            "You can't have an empty list item"
+            "You cannot have an empty list item"
         ))
         # user correct it by adding some content
         self.browser.find_element_by_id('id_new_item').send_keys("Make tea")
