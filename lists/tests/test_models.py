@@ -1,12 +1,11 @@
-from unittest import TestCase
-
+from django.test import TestCase
 from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
 
 from lists.models import Item, List
 
 
-class ListandItemModelsTest(TestCase):
+class ListAndItemModelsTest(TestCase):
 
     def test_get_absolute_url(self):
         list_ = List.objects.create()
@@ -16,24 +15,22 @@ class ListandItemModelsTest(TestCase):
         list_ = List.objects.create()
         list_.save()
 
-        first_item = Item()
+        first_item = Item.objects.create(list=list_)
         first_item.text = 'The first (ever) list item'
-        first_item.list = list_
         first_item.save()
 
-        second_item = Item()
+        second_item = Item.objects.create(list=list_)
         second_item.text = "Item the second"
-        second_item.list = list_
         second_item.save()
 
         saved_list = List.objects.last()
         self.assertEqual(saved_list, list_)
 
         saved_items = Item.objects.all()
-        self.assertEqual(saved_items.count(), 3)
+        self.assertEqual(saved_items.count(), 2)
 
-        first_item_saved = saved_items[1]
-        second_item_saved = saved_items[2]
+        first_item_saved = saved_items[0]
+        second_item_saved = saved_items[1]
         self.assertEqual(first_item_saved.text, 'The first (ever) list item')
         self.assertEqual(first_item_saved.list, list_)
         self.assertEqual(second_item_saved.text, 'Item the second')
@@ -46,3 +43,10 @@ class ListandItemModelsTest(TestCase):
             item.save()
             item.full_clean()
             return redirect(f'/lists/{list_.id}/')
+
+    def test_CAN_save_same_item_to_different_lists(self):
+        list1 = List.objects.create()
+        list2 = List.objects.create()
+        Item.objects.create(list=list1, text='bla')
+        item = Item(list=list2, text='bla')
+        item.full_clean()  # should not raise

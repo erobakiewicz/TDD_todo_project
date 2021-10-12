@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from lists.forms import ItemForm, EMPTY_ITEM_ERROR
+from lists.models import Item, List
 
 
 class ItemFormTest(TestCase):
