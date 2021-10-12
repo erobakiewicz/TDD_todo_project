@@ -1,3 +1,5 @@
+from unittest import skip
+
 from django.test import TestCase
 from django.utils.html import escape
 
@@ -115,6 +117,20 @@ class NewListTest(TestCase):
     def test_for_invalid_input_shows_error_on_page(self):
         response = self.post_invalid_input()
         self.assertContains(response, EMPTY_ITEM_ERROR)
+
+    @skip
+    def test_duplicate_item_validation_errors_end_up_on_lists_page(self):
+        list1 = List.objects.create()
+        item1 = Item.objects.create(list=list1, text='textey')
+        response = self.client.post(
+            f'/lists/{list1.id}/',
+            data={'text': 'textey'}
+        )
+
+        expected_error = "You cannot have an empty list item"
+        self.assertContains(response, expected_error)
+        self.assertTemplateUsed(response, 'list.html')
+        self.assertEqual(Item.objects.all().count(), 1)
 
     def test_validation_errors_are_sent_back_to_home_page_templates(self):
         response = self.client.post('/lists/new', data={'text': ''})
