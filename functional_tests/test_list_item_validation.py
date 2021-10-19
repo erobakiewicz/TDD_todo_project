@@ -8,7 +8,7 @@ from functional_tests.base import FunctionalTest
 class ItemValidationTest(FunctionalTest):
 
     def get_error_element(self):
-        return self.browser.find_elements_by_css_selector('.has-error')
+        return self.browser.find_element_by_css_selector('.has-error')
 
     def test_cannot_add_empty_list_item(self):
         # Edith goes to the home page and accidentally tries to submit
