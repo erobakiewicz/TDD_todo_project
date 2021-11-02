@@ -13,6 +13,7 @@ class SendLoginEmailViewTest(TestCase):
                 'email': 'edith@example.com'
             }
         )
+        print(response)
         self.assertRedirects(response, '/')
 
     def test_sends_mail_to_address_from_post(self):
