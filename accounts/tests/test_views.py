@@ -1,20 +1,11 @@
-from unittest.mock import patch
+from unittest.mock import patch, call
 
 from django.test import TestCase
 import accounts.views
+from accounts.models import Token
 
 
 class SendLoginEmailViewTest(TestCase):
-
-    def test_redirects_to_home_page(self):
-        response = self.client.post(
-            '/accounts/send_login_email',
-            data={
-                'email': 'edith@example.com'
-            }
-        )
-        print(response)
-        self.assertRedirects(response, '/')
 
     def test_sends_mail_to_address_from_post(self):
         self.send_mail_called = False
@@ -55,13 +46,43 @@ class SendLoginEmailViewTest(TestCase):
         self.assertEqual(from_mail, 'noreply@superlists')
         self.assertEqual(to_list, ['edith@example.com'])
 
+    def test_adds_success_message(self):
+        response = self.client.post(
+            '/accounts/send_login_email',
+            data={
+                'email': 'edith@example.com'
+            }, follow=True
+        )
 
+        message = list(response.context['messages'])[0]
+        self.assertEqual(
+            message.message,
+            "Check your email, we've sent you a link you can use to log in"
+        )
+        self.assertEqual(message.tags, 'success')
 
+    def test_create_token_associeted_with_email(self):
+        self.client.post(
+            '/accounts/send_login_email',
+            data={
+                'email': 'edith@example.com'
+            }
+        )
+        token = Token.objects.first()
+        self.assertEqual(token.email, 'edith@example.com')
 
+    @patch('accounts.views.auth')
+    def test_calls_authenticate_with_uid_from_get_request(self, mock_auth):
+        self.client.get('/accounts/login?token=abcd123')
+        self.assertEqual(
+            mock_auth.authenticate.call_args,
+            call(uid='abcd123')
+        )
 
-
-
-
-
-
-
+    @patch('accounts.views.auth')
+    def test_calls_auth_login_with_user_if_there_is_one(self, mock_auth):
+        response = self.client.get('/accounts/login?token=abcd123')
+        self.assertEqual(
+            mock_auth.login.call_args,
+            call(response.wsgi_request, mock_auth.authenticate.return_value)
+        )
