@@ -27,8 +27,7 @@ class MyListsTest(FunctionalTest):
         email = 'edith@example.com'
         self.browser.get(self.live_server_url)
         self.wait_to_be_logged_out(email)
-
         # Edith is a logged-in user
         self.create_pre_authenticated_session(email)
         self.browser.get(self.live_server_url)
-        self.wait_to_be_logged_out(email)
+        self.wait_to_be_logged_in(email)
