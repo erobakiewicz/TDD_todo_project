@@ -1,9 +1,7 @@
-import sys
-
-from django.contrib import messages, auth
+from django.contrib import auth, messages
 from django.core.mail import send_mail
+from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
-from django.urls import reverse
 
 from accounts.models import Token
 
@@ -23,16 +21,13 @@ def send_login_email(request):
     )
     messages.success(
         request,
-        "Check your email, we've sent you a link you can use to log in"
+        "Check your email, we've sent you a link you can use to log in."
     )
     return redirect('/')
 
 
 def login(request):
-    auth.authenticate(uid=request.GET.get('token'))
-    auth.login(request, user)
+    user = auth.authenticate(uid=request.GET.get('token'))
+    if user:
+        auth.login(request, user)
     return redirect('/')
-
-
-def logout(request):
-    pass

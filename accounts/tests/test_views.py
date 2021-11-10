@@ -57,7 +57,7 @@ class SendLoginEmailViewTest(TestCase):
         message = list(response.context['messages'])[0]
         self.assertEqual(
             message.message,
-            "Check your email, we've sent you a link you can use to log in"
+            "Check your email, we've sent you a link you can use to log in."
         )
         self.assertEqual(message.tags, 'success')
 
@@ -71,7 +71,10 @@ class SendLoginEmailViewTest(TestCase):
         token = Token.objects.first()
         self.assertEqual(token.email, 'edith@example.com')
 
-    @patch('accounts.views.auth')
+
+@patch('accounts.views.auth')
+class LoginViewTest(TestCase):
+
     def test_calls_authenticate_with_uid_from_get_request(self, mock_auth):
         self.client.get('/accounts/login?token=abcd123')
         self.assertEqual(
@@ -79,10 +82,15 @@ class SendLoginEmailViewTest(TestCase):
             call(uid='abcd123')
         )
 
-    @patch('accounts.views.auth')
     def test_calls_auth_login_with_user_if_there_is_one(self, mock_auth):
         response = self.client.get('/accounts/login?token=abcd123')
         self.assertEqual(
             mock_auth.login.call_args,
             call(response.wsgi_request, mock_auth.authenticate.return_value)
         )
+
+    def test_does_not_login_if_user_is_not_authenticated(self, mock_auth):
+        mock_auth.authenticate.return_value = None
+        self.client.get('/accounts/login?token=abcd123')
+        self.assertEqual(mock_auth.login.called, False)
+
