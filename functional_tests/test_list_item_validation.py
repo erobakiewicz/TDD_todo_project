@@ -27,14 +27,13 @@ class ItemValidationTest(FunctionalTest):
         ))
 
         # She starts typing some text for the new item and the error disappears
-        self.get_item_input_box().send_keys('Buy milk')
+        self.add_list_item('Buy milk')
         self.wait_for(lambda: self.browser.find_elements_by_css_selector(
             '#id_text:valid'
         ))
 
-        # And she can submit it successfully
-        self.get_item_input_box().send_keys(Keys.ENTER)
-        self.wait_for_row_in_list_table('1: Buy milk')
+        # # And she can submit it successfully
+
 
         # Perversely, she now decides to submit a second blank list item
         self.get_item_input_box().send_keys(Keys.ENTER)
@@ -60,8 +59,7 @@ class ItemValidationTest(FunctionalTest):
         self.add_list_item('Buy wellies')
 
         # She accidentally tries to enter a duplicate item
-        self.get_item_input_box().send_keys('Buy wellies')
-        self.get_item_input_box().send_keys(Keys.ENTER)
+        self.add_list_item('Buy wellies')
 
         # She sees a helpful error message
         self.wait_for(lambda: self.assertEqual(
