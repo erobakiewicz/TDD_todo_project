@@ -157,7 +157,6 @@ class NewListViewIntegratedTest(TestCase):
         self.assertIsInstance(response.context['form'], ExistingListItemForm)
         self.assertContains(response, 'name="text"')
 
-    @unittest.skip
     @patch('lists.views.List')
     @patch('lists.views.ItemForm')
     def test_list_owner_is_saved_if_user_is_authenticated(
