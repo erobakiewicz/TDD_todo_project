@@ -18,6 +18,10 @@ class List(models.Model):
     def __str__(self):
         return f"{self.id}"
 
+    @property
+    def name(self):
+        return self.item_set.first().text
+
 
 # Create your models here.
 class Item(models.Model):
