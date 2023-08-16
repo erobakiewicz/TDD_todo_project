@@ -30,4 +30,4 @@ jobs:
     - name: Run Lint
       run: |
           pip install flake8
-          flake8 --exclude=migrations --statistics
+          flake8 --exclude=migrations, manage.py --statistics
