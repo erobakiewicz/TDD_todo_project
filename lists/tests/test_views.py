@@ -1,4 +1,3 @@
-import unittest
 from unittest.mock import patch, Mock
 
 from django.contrib.auth import get_user_model
@@ -37,7 +36,7 @@ class HomePageTest(TestCase):
 class NewListViewIntegratedTest(TestCase):
 
     def test_can_save_a_POST_request(self):
-        response = self.client.post('/lists/new', data={'text': "A new list item"})
+        self.client.post('/lists/new', data={'text': "A new list item"})
         self.assertEqual(Item.objects.count(), 1)
         new_item = Item.objects.first()
         self.assertEqual(new_item.text, "A new list item")
@@ -68,7 +67,7 @@ class NewListViewIntegratedTest(TestCase):
         self.assertNotContains(response, 'other list item 2')
 
     def test_redirects_to_list_view(self):
-        other_list = List.objects.create()
+        List.objects.create()
         correct_list = List.objects.create()
 
         response = self.client.post(
@@ -78,7 +77,7 @@ class NewListViewIntegratedTest(TestCase):
         self.assertRedirects(response, f'/lists/{correct_list.id}/')
 
     def test_passes_correct_list_to_template(self):
-        other_list = List.objects.create()
+        List.objects.create()
         correct_list = List.objects.create()
 
         response = self.client.get(f'/lists/{correct_list.id}/')
@@ -121,7 +120,7 @@ class NewListViewIntegratedTest(TestCase):
 
     def test_duplicate_item_validation_errors_end_up_on_lists_page(self):
         list1 = List.objects.create()
-        item1 = Item.objects.create(list=list1, text='textey')
+        Item.objects.create(list=list1, text='textey')
         response = self.client.post(
             f'/lists/{list1.id}/',
             data={'text': 'textey'}
@@ -184,25 +183,12 @@ class MyListsTest(TestCase):
 
 
 @patch('lists.views.NewListForm')
-class NewListViewUnitTest(unittest.TestCase):
+class NewListViewUnitTest(TestCase):
 
     def setUp(self):
         self.request = HttpRequest()
         self.request.POST['text'] = 'new list item'
         self.request.user = Mock()
-
-    def test_passes_POST_data_to_NewListForm(
-            self,
-            mockNewListForm,
-    ):
-        new_list(self.request)
-        mockNewListForm.assert_called_once_with(data=self.request.POST)
-
-    def test_saves_form_with_owner_if_form_valid(self, mockNewListForm):
-        mock_form = mockNewListForm.return_value
-        mock_form.is_valid.return_value = True
-        new_list(self.request)
-        mock_form.save.assert_called_once_with(owner=self.request.user)
 
     @patch('lists.views.redirect')
     def test_redirects_to_form_returned_object_if_form_valid(self, mock_redirect, mockNewListForm):

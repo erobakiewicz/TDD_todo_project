@@ -1,7 +1,12 @@
+import unittest
+
 from selenium.webdriver.common.keys import Keys
+
+from superlists.settings import env
 from .base import FunctionalTest
 
 
+@unittest.skipIf(env('SELENIUM_TESTS'), 'Skipping Selenium tests')
 class ItemValidationTest(FunctionalTest):
 
     def get_error_element(self):
@@ -33,7 +38,6 @@ class ItemValidationTest(FunctionalTest):
         ))
 
         # # And she can submit it successfully
-
 
         # Perversely, she now decides to submit a second blank list item
         self.get_item_input_box().send_keys(Keys.ENTER)

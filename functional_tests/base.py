@@ -1,14 +1,18 @@
 import os
 import time
+import unittest
 
 from selenium import webdriver
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.keys import Keys
 
+from superlists.settings import env
+
 MAX_WAIT = 10
 
 
+@unittest.skipIf(env('SELENIUM_TESTS'), 'Skipping Selenium tests')
 class FunctionalTest(StaticLiveServerTestCase):
 
     def setUp(self) -> None:

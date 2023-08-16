@@ -32,7 +32,7 @@ class SendLoginEmailViewTest(TestCase):
         self.assertEqual(self.to_list, ['edith@example.com'])
 
     @patch('accounts.views.send_mail')
-    def test_sends_mail_to_address_from_post(self, mock_send_mail):
+    def test_sends_mail_to_address_from_post_2(self, mock_send_mail):
         self.client.post(
             '/accounts/send_login_email',
             data={
@@ -93,4 +93,3 @@ class LoginViewTest(TestCase):
         mock_auth.authenticate.return_value = None
         self.client.get('/accounts/login?token=abcd123')
         self.assertEqual(mock_auth.login.called, False)
-

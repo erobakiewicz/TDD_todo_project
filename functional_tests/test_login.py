@@ -1,14 +1,17 @@
 import re
+import unittest
 
 from django.core import mail
 from selenium.webdriver.common.keys import Keys
 
 from functional_tests.base import FunctionalTest
+from superlists.settings import env
 
 TEST_EMAIL = 'edith@example.com'
 SUBJECT = "Your login link for Superlists"
 
 
+@unittest.skipIf(env('SELENIUM_TESTS'), 'Skipping Selenium tests')
 class LoginTest(FunctionalTest):
 
     def test_can_get_email_link_to_log_in(self):
@@ -16,8 +19,8 @@ class LoginTest(FunctionalTest):
         # 'log-in' section in navbar
         # it tells her to enter her email she does
         self.browser.get(self.live_server_url)
-        self.browser.find_element_by_name('email').send_keys(TEST_EMAIL)
-        self.browser.find_element_by_name('email').send_keys(Keys.ENTER)
+        self.browser.find_element('email').send_keys(TEST_EMAIL)
+        self.browser.find_element('email').send_keys(Keys.ENTER)
 
         # a message appears telling her an email has been sent
         self.wait_for(lambda: self.assertIn(

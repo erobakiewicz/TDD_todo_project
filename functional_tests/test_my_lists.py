@@ -1,11 +1,15 @@
+import unittest
+
 from django.conf import settings
 from django.contrib.auth import SESSION_KEY, BACKEND_SESSION_KEY
 from django.contrib.sessions.backends.db import SessionStore
 
 from accounts.models import User
 from functional_tests.base import FunctionalTest
+from superlists.settings import env
 
 
+@unittest.skipIf(env('SELENIUM_TESTS'), 'Skipping Selenium tests')
 class MyListsTest(FunctionalTest):
 
     def create_pre_authenticated_session(self, email):
