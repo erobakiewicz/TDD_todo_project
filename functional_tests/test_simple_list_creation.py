@@ -4,10 +4,10 @@ from selenium.webdriver.common.keys import Keys
 from selenium import webdriver
 
 from functional_tests.base import FunctionalTest
-from superlists.settings import env
+from superlists.settings import SKIP_SELENIUM_TESTS
 
 
-@unittest.skipIf(env('SELENIUM_TESTS'), 'Skipping Selenium tests')
+@unittest.skipIf(SKIP_SELENIUM_TESTS, 'Skipping Selenium tests')
 class NewVisitorTest(FunctionalTest):
 
     def test_can_start_a_list_for_one_user(self):

@@ -2,11 +2,11 @@ import unittest
 
 from selenium.webdriver.common.keys import Keys
 
-from superlists.settings import env
+from superlists.settings import SKIP_SELENIUM_TESTS
 from .base import FunctionalTest
 
 
-@unittest.skipIf(env('SELENIUM_TESTS'), 'Skipping Selenium tests')
+@unittest.skipIf(SKIP_SELENIUM_TESTS, 'Skipping Selenium tests')
 class ItemValidationTest(FunctionalTest):
 
     def get_error_element(self):

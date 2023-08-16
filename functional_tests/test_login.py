@@ -5,13 +5,13 @@ from django.core import mail
 from selenium.webdriver.common.keys import Keys
 
 from functional_tests.base import FunctionalTest
-from superlists.settings import env
+from superlists.settings import SKIP_SELENIUM_TESTS
 
 TEST_EMAIL = 'edith@example.com'
 SUBJECT = "Your login link for Superlists"
 
 
-@unittest.skipIf(env('SELENIUM_TESTS'), 'Skipping Selenium tests')
+@unittest.skipIf(SKIP_SELENIUM_TESTS, 'Skipping Selenium tests')
 class LoginTest(FunctionalTest):
 
     def test_can_get_email_link_to_log_in(self):

@@ -6,10 +6,10 @@ from django.contrib.sessions.backends.db import SessionStore
 
 from accounts.models import User
 from functional_tests.base import FunctionalTest
-from superlists.settings import env
+from superlists.settings import SKIP_SELENIUM_TESTS
 
 
-@unittest.skipIf(env('SELENIUM_TESTS'), 'Skipping Selenium tests')
+@unittest.skipIf(SKIP_SELENIUM_TESTS, 'Skipping Selenium tests')
 class MyListsTest(FunctionalTest):
 
     def create_pre_authenticated_session(self, email):
